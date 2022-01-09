@@ -1,0 +1,34 @@
+WHILE = "while".
+DO = "do".
+RETURN = "return".
+DEF = "def".
+VAR = "[a-zA-Z_][a-zA-Z0-9_]*".
+LITERAL = "0|[1-9][0-9]*".
+ASSIGN_OP = "=".
+MATH_OP = "[\\+\\-\\*\\/]".
+COMPARE_OP = ">|(>=)|<|(<=)|(==)".
+LOGIC_OP = "&&|\\|\\|".
+BRACKET_OPEN = "\\(".
+BRACKET_CLOSE = "\\)".
+BEGIN = "\\{".
+END = "\\}".
+COMMA = ",".
+END_OF_LINE = ";".
+
+value = LITERAL | VAR.
+operator = MATH_OP | LOGIC_OP | COMPARE_OP.
+value_expr = (value | function_call | BRACKET_OPEN, value_expr, BRACKET_CLOSE | assign_expr), [(operator, value_expr)].
+assign_expr = VAR, ASSIGN_OP, value_expr.
+final_value_expr = value_expr, END_OF_LINE.
+condition = BRACKET_OPEN, value_expr, BRACKET_CLOSE.
+block = (BEGIN, {expression}, END) | expression.
+if_else = (IF, condition, block, ELSE, block) | (IF, condition, block).
+while = WHILE, condition, block.
+do_while = DO, block, WHILE, condition, END_OF_LINE.
+function_call = VAR, ((BRACKET_OPEN, argument_list, BRACKET_CLOSE) | (BRACKET_OPEN BRACKET_CLOSE)).
+argument_list = value_expr | (value_expr, COMMA, argument_list).
+return_expr = RETURN, final_value_expr.
+function_def_args = VAR, {(COMMA, VAR)}.
+function_defenition = DEF, VAR, BRACKET_OPEN, function_def_args, BRACKET_CLOSE, BEGIN, {expression}, END.
+expression = final_value_expr | while | do_while | if_else | return_expr.
+lang = {function_defenition | expression}.

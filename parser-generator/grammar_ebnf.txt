@@ -1,0 +1,23 @@
+VAR = "[a-zA-Z_][a-zA-Z_0-9]*".
+COMMA = ",".
+DOT = "\\.".
+ASSIGN = "=".
+OR = "\\|".
+BR_OP = "\\(". BR_CL = "\\)".
+CR_OP = "\\{". CR_CL = "\\}".
+SQ_OP = "\\[". SQ_CL = "\\]".
+STRING = "\"([^\"\n]|(\\\\\"))*\"".
+STRING_BEGINNING = "\"([^\"\n]|(\\\\\"))*".
+
+zero_or_one = SQ_OP, expression, SQ_CL.
+zero_or_more = CR_OP, expression, CR_CL.
+group = BR_OP, expression, BR_CL.
+expression = (VAR | STRING | zero_or_one |
+              zero_or_more | group),
+             [
+             (OR, expression) |
+             (COMMA, expression)
+             ].
+             
+rule = VAR, ASSIGN, expression, DOT.
+lang = {rule}.
