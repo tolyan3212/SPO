@@ -1,0 +1,120 @@
+#include "parser.h"
+
+#include <list>
+#include <stdexcept>
+
+
+Unit::Unit(Token token)
+    : token(token),
+      tree(nullptr),
+      _isToken(true)
+{}
+Unit::Unit(ParserTree *tree)
+    : token(Token("NOT A TOKEN", Token::VAR)),
+      tree(tree),
+      _isToken(false)
+{}
+
+bool Unit::isToken()
+{
+    return _isToken;
+}
+bool Unit::isTree()
+{
+    return !_isToken;
+}
+
+Token Unit::getToken()
+{
+    if (!isToken()) {
+        throw std::runtime_error("Trying to get token of a tree unit");
+    }
+    return token;
+}
+
+ParserTree* Unit::getTree()
+{
+    if (isToken()) {
+        throw std::runtime_error("Trying to get tree of a token unit");
+    }
+    return tree.get();
+}
+
+
+ParserTree::ParserTree(ParserTree::Type type,
+                       std::vector<Unit> units)
+    : type(type),
+      units(units)
+{}
+
+
+std::vector<Token> ParserTree::getAllTokens()
+{
+    std::vector<Token> res;
+
+    for (int i = 0; i < (int) units.size(); i++) {
+        if (units[i].isToken()) {
+            res.push_back(units[i].getToken());
+        }
+        else {
+            auto subtreeTokens = units[i].getTree()->getAllTokens();
+            res.insert(res.end(), subtreeTokens.begin(),
+                       subtreeTokens.end());
+        }
+    }
+
+    return res;
+}
+
+ParserTree* ParserTree::copy()
+{
+    ParserTree* res = new ParserTree(type, {});
+    for (Unit &u : units) {
+        if (u.isToken()) {
+            res->units.push_back(Unit(Token(u.getToken())));
+        }
+        else {
+            res->units.push_back(Unit(u.getTree()->copy()));
+        }
+    }
+    return res;
+}
+
+Parser::Parser()
+{}
+
+bool Parser::addToken(ParserTree* tree, Token::Type type)
+{
+    if (currentIndex < (int)tokens.size() &&
+        tokens[currentIndex].type == type) {
+        tree->units.push_back(Unit(tokens[currentIndex]));
+        currentIndex++;
+        return true;
+    }
+    return false;
+}
+
+bool Parser::addTree(ParserTree* tree, ParserTree* subtree)
+{
+    if (!subtree) {
+        return false;
+    }
+    tree->units.push_back(Unit(subtree));
+    return true;
+}
+
+ParserTree* Parser::parse(std::vector<Token> tokens)
+{
+    this->tokens = tokens;
+    currentIndex = 0;
+
+    ParserTree* tree = lang();
+    if (currentIndex != (int) tokens.size()) {
+        delete tree;
+        throw std::runtime_error("Error while parsing at token number: "
+                                 + std::to_string(currentIndex));
+    }
+    return tree;
+}
+
+#{1}
