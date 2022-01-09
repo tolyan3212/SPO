@@ -219,7 +219,7 @@ ParserTree* Parser::rule()
     ParserTree* tree = new ParserTree(ParserTree::rule, {});
 
     if (!(addToken(tree, Token::VAR) &&
-          addToken(tree, Token::EQUAL) &&
+          addToken(tree, Token::ASSIGN) &&
           addTree(tree, expression()) &&
           addToken(tree, Token::DOT))) {
         currentIndex = indexBefore;

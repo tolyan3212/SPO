@@ -20,6 +20,20 @@ ParserTree* Parser::#{1}() {\n\
 }\n"
 };
 
+const std::string ifTemplate {
+    "if (#{1}) {\n\
+    #{2}\n\
+}\n"
+};
+
+const std::string ifElseTemplate {
+    "if (#{1}) {\n\
+    #{2}\n\
+}\n\
+else {\n\
+    #{3}\n\
+}\n"
+};
 
 // 1 - порядковый номер проверки
 // 2 - код для вычисления успешности первого выражения
@@ -259,6 +273,7 @@ void ParserGenerator::generateParser()
     }
 
     for (int i = 0; i < (int)lexemsArray.size(); i++) {
+        currentExpressionNumber = 0;
         std::string lexem = lexemsArray[i];
         std::cout << "lexem is " << lexem << "\n";
         types += lexem + "=" + std::to_string(i) + ",";
@@ -369,6 +384,8 @@ ParserGenerator::getExpressionCode(Unit &unit)
     }
     else {
         return getExpressionCode(unit.getTree());
+        // zero_or_one && zero_or_more
+        // throw std::runtime_error("not implemented");
     }
 }
 
